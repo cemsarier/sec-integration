@@ -1,18 +1,27 @@
-from core import utils
 from core.handler import Reader_10K
 from core.client import SECClient
 from settings import SEC_USER_AGENT, OUTPUT_DIR
+from core.constants import COMPANIES_TO_CIK
 
 # Initialize SEC client
 sec_client = SECClient(user_agent=SEC_USER_AGENT)
-reader = Reader_10K(sec_client)
+reader = Reader_10K(sec_client, OUTPUT_DIR)
 
-# List of companies to download 10-K filings for
-companies = ["Apple"]
-cik = "0000320193"  # CIK for Apple Inc.
+# Fetch and save latest 10-K filings for each company
+for company, cik in COMPANIES_TO_CIK.items():
+    print(f"Fetching latest 10-K for {company} (CIK: {cik})...")
 
-# Initialzie the output directory
-utils.create_dir(OUTPUT_DIR)
-output_path = reader.fetch_and_download_latest_10k(
-    company="Apple", output_path=OUTPUT_DIR
-)
+    # All submissions
+    submissions = reader.fetch_all_company_submissions(cik)
+
+    # Get latest 10-K filing summary
+    latest_10k_summary = reader.get_latest_filing_summary_from_submissions(
+        submissions, form_type="10-K"
+    )
+
+    # Fetch the latest filing document
+    latest_10k_filing_html = reader.get_filing_document(cik, latest_10k_summary)
+
+    # Save filing and create PDF
+    result_path = reader.save_filing(cik, latest_10k_filing_html, latest_10k_summary)
+    pdf_path = reader.create_pdf_from_filing(result_path)

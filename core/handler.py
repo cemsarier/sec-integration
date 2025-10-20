@@ -1,24 +1,35 @@
-from typing import Optional, Dict
+import os
+from typing import Optional, Dict, TypedDict, Any
 from core.client import SECClient
 from core import utils
-from core.constants import COMPANIES_TO_CIK
+
+
+class LatestFilingSummary(TypedDict):
+    form: str
+    accessionNumber: str
+    primaryDocument: str
+    filingDate: str
 
 
 class Reader_10K:
-    def __init__(self, SEC_client: SECClient):
+    def __init__(self, SEC_client: SECClient, output_path: str):
         self.SEC_client = SEC_client
+        self.output_path = output_path
+        utils.create_dir(self.output_path)
 
-    def fetch_company_submissions(self, cik: str) -> Dict:
+    def fetch_all_company_submissions(self, cik: str) -> Any:
         """
         Fetch company submissions JSON for the given CIK.
         """
         return self.SEC_client.get_company_submissions(cik)
 
-    def get_latest_filing_from_submissions(
-        self, submissions: Dict, form_type: str = "10-K"
-    ) -> Optional[Dict]:
+    @staticmethod
+    def get_latest_filing_summary_from_submissions(
+        submissions: Dict, form_type: str = "10-K"
+    ) -> Optional[LatestFilingSummary]:
         """
-        From the 'recent filings' section, return the most recent filing of the given type.
+        From the 'recent filings' section of the given submissions,
+        return the most recent filing of the given type.
         """
         filings = submissions.get("filings", {}).get("recent", {})
 
@@ -27,48 +38,42 @@ class Reader_10K:
         docs = filings.get("primaryDocument", [])
         dates = filings.get("filingDate", [])  # sorted by most recent first
 
-        # Available keys:  ['accessionNumber', 'filingDate', 'reportDate', 'acceptanceDateTime',
-        # 'act', 'form', 'fileNumber', 'filmNumber', 'items', 'core_type', 'size', 'isXBRL', 'isInlineXBRL',
-        # 'primaryDocument', 'primaryDocDescription']
-
-        # TODO: make sure the dates are sorted most recent first
-
         for idx, form in enumerate(forms):
             if form and form.upper().startswith(form_type.upper()):
                 # NOTE: Assumes there is only one latest filing of this type implicitly
-                return {
-                    "form": form,
-                    "accessionNumber": accessions[idx],
-                    "primaryDocument": docs[idx],
-                    "filingDate": dates[idx],
-                }
+                return LatestFilingSummary(
+                    form=form,
+                    accessionNumber=accessions[idx],
+                    primaryDocument=docs[idx],
+                    filingDate=dates[idx],
+                )
         return None
 
-    def fetch_and_download_latest_10k(
-        self, company: str, output_path: str
-    ) -> Optional[str]:
+    def get_filing_document(self, cik: str, filing_summary: LatestFilingSummary) -> str:
         """
-        Download the latest 10-K filing for the given CIK and save it to the specified output path.
-        Returns the path to the saved file or None if no 10-K found.
+        Fetch company submissions html text for the given CIK and filing summary.
         """
-        cik = COMPANIES_TO_CIK.get(company)
-        if not cik:
-            print(f"CIK not found for company: {company}")
-            return None
-
-        submissions = self.fetch_company_submissions(cik)
-        latest_filing = self.get_latest_filing_from_submissions(
-            submissions, form_type="10-K"
+        return self.SEC_client.get_filing_document(
+            cik, filing_summary["accessionNumber"], filing_summary["primaryDocument"]
         )
-        if not latest_filing:
-            print(f"No 10-K filing found for CIK {cik}.")
-            return None
 
-        accession = latest_filing["accessionNumber"]
-        primary_doc = latest_filing["primaryDocument"]
+    def save_filing(
+        self, cik: str, filing_html: str, filing_summary: LatestFilingSummary
+    ) -> str:
+        """
+        Save the 10-K filing for the given company to the specified output path.
+        Returns the path to the saved file.
+        """
+        save_path = os.path.join(
+            self.output_path, cik, f"10-K_{filing_summary['filingDate']}.html"
+        )
+        utils.save_html_to_file(filing_html, save_path)
+        print(f"Saved latest 10-K to {save_path}")
+        return save_path
 
-        html_text = self.SEC_client.get_filing_document(cik, accession, primary_doc)
-        save_path = f"{output_path}/{company}_10-K_{latest_filing['filingDate']}.html"
-        utils.save_html_to_file(html_text, save_path)
-        print(f"Saved latest 10-K to {output_path}")
-        return output_path
+    def create_pdf_from_filing(self, filing_html_path: str) -> Optional[str]:
+        """
+        Create a PDF from the 10-K filing HTML for the given company.
+        Returns the path to the saved PDF file.
+        """
+        return utils.convert_html_to_pdf(filing_html_path)
