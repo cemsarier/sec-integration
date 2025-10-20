@@ -1,0 +1,80 @@
+[project]
+name = "quartr"
+version = "0.1.0"
+description = "Work for the Quartr case study"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "black>=24.8.0",
+    "mypy>=1.14.1",
+    "pdfkit>=1.0.0",
+    "pytest>=8.3.5",
+    "reportlab>=4.4.3",
+    "requests>=2.32.4",
+    "ruff>=0.14.1",
+    "types-requests>=2.32.4.20250913",
+]
+
+# ----------------------------
+# Formatting: Black
+# ----------------------------
+[tool.black]
+line-length = 90
+target-version = ["py312"]
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.git
+    | \.mypy_cache
+    | \.ruff_cache
+    | \.pytest_cache
+    | build
+    | dist
+    | \.venv
+    | __pycache__
+  )/
+)
+'''
+
+# ----------------------------
+# Linting: Ruff
+# ----------------------------
+[tool.ruff]
+line-length = 90
+target-version = "py312"
+lint.select = [
+    "E", "F", "W",    # pycodestyle / pyflakes
+    "B",              # flake8-bugbear
+    "I",              # isort-like import sorting
+    "UP",             # pyupgrade
+    "N",              # naming
+    "S",              # security
+    "C4",             # comprehensions
+    "T20",            # print/logging statements
+]
+lint.ignore = [
+    "E501",  # handled by black
+]
+exclude = ["build", "dist", ".venv", "__pycache__"]
+fix = false
+show-fixes = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ----------------------------
+# Type Checking: MyPy
+# ----------------------------
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+check_untyped_defs = true
+strict_optional = true
+no_implicit_optional = true
+exclude = '^(build|dist|\.venv|tests/fixtures)/'
+files = ["core/"]
