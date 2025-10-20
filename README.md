@@ -1,9 +1,7 @@
 # Installation
 To run this project, follow these steps:
 * Install `uv` as package manager, follow the steps here https://docs.astral.sh/uv/getting-started/installation/#pypi
-* Install wkhtmltopdf:
-  * Windows: by following the instructions at https://wkhtmltopdf.org/downloads.html
-  * macOS: using Homebrew with the command `brew install wkhtmltopdf`
+* Install wkhtmltopdf by following the instructions at https://wkhtmltopdf.org/downloads.html
 * Clone the repository: `git clone https://github.com/cemsarier/sec-integration`
 * Navigate to the project directory
 * Install the required dependencies with uv: `uv sync`
