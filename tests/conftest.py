@@ -1,4 +1,5 @@
 import pytest
+
 from core.client import SECClient
 
 

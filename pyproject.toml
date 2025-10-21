@@ -55,6 +55,12 @@ lint.select = [
 ]
 lint.ignore = [
     "E501",  # handled by black
+    "S101",  # allow use of assert statements
+    "S301",  # allow use of pickle module
+    "T201",  # allow use of print function
+    "UP045", # no need to use `X | None` for type annotations
+    "UP006", # allow Dict for type annotations
+    "UP035", # allow typing.Dict for type annotations
 ]
 exclude = ["build", "dist", ".venv", "__pycache__"]
 fix = false

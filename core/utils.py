@@ -1,10 +1,11 @@
 """Contains utility functions for the project."""
 
+import hashlib
 import os
 import sys
-import pdfkit
-import hashlib
 from typing import Optional
+
+import pdfkit
 
 
 def pad_cik(cik: str) -> str:

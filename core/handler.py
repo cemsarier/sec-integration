@@ -1,7 +1,10 @@
+"""Handler for fetching and processing 10-K filings from the SEC EDGAR database."""
+
 import os
-from typing import Optional, Dict, TypedDict, Any
-from core.client import SECClient
+from typing import Any, Dict, Optional, TypedDict
+
 from core import utils
+from core.client import SECClient
 
 
 class LatestFilingSummary(TypedDict):
@@ -11,9 +14,9 @@ class LatestFilingSummary(TypedDict):
     filingDate: str
 
 
-class Reader_10K:
-    def __init__(self, SEC_client: SECClient, output_path: str):
-        self.SEC_client = SEC_client
+class SECReader:
+    def __init__(self, sec_client: SECClient, output_path: str):
+        self.SEC_client = sec_client
         self.output_path = output_path
         utils.create_dir(self.output_path)
 

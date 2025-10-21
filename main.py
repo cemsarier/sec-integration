@@ -1,11 +1,11 @@
-from core.handler import Reader_10K
 from core.client import SECClient
-from settings import SEC_USER_AGENT, OUTPUT_DIR
 from core.constants import COMPANIES_TO_CIK
+from core.handler import SECReader
+from settings import OUTPUT_DIR, SEC_USER_AGENT
 
 # Initialize SEC client
 sec_client = SECClient(user_agent=SEC_USER_AGENT)
-reader = Reader_10K(sec_client, OUTPUT_DIR)
+reader = SECReader(sec_client, OUTPUT_DIR)
 
 # Fetch and save latest 10-K filings for each company
 for company, cik in COMPANIES_TO_CIK.items():

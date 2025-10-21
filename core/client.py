@@ -1,15 +1,14 @@
+"""A simple SEC EDGAR API client."""
+
 import time
+from typing import Any
+
 import requests
 
-from typing import Optional, Dict, Any
 from core import utils
 
 
 class SECClient:
-    """
-    A lightweight client for interacting with the SEC EDGAR API.
-    """
-
     BASE_URL = "https://data.sec.gov"
     ARCHIVE_URL = "https://www.sec.gov/Archives/edgar/data"
     RETRY_COUNT = 3

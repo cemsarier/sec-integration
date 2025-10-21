@@ -1,6 +1,7 @@
 import os
 import pickle
-from core.handler import Reader_10K, LatestFilingSummary
+
+from core.handler import LatestFilingSummary, SECReader
 
 
 def test_get_latest_filing_summary_from_submissions(client):
@@ -8,7 +9,7 @@ def test_get_latest_filing_summary_from_submissions(client):
     output_path = os.path.join("tests", "test_data")
     with open(os.path.join(output_path, "apple_submissions_20251020.pkl"), "rb") as f:
         submissions = pickle.load(f)
-    reader = Reader_10K(client, output_path=output_path)
+    reader = SECReader(client, output_path=output_path)
     latest_10k = reader.get_latest_filing_summary_from_submissions(
         submissions, form_type="10-K"
     )
@@ -21,7 +22,7 @@ def test_get_latest_filing_summary_from_submissions(client):
 
 def test_save_filing(client):
     output_path = os.path.join("tests", "test_data")
-    reader = Reader_10K(client, output_path=output_path)
+    reader = SECReader(client, output_path=output_path)
     with open(os.path.join(output_path, "Apple_10-K_2024-11-01.pkl"), "rb") as f:
         filing_html = pickle.load(f)
     filing_summary = LatestFilingSummary(
@@ -36,7 +37,7 @@ def test_save_filing(client):
 
 def test_create_pdf_from_filing(client):
     output_path = os.path.join("tests", "test_data")
-    reader = Reader_10K(client, output_path=output_path)
+    reader = SECReader(client, output_path=output_path)
     html_path = os.path.join(output_path, "0000320193", "10-K_2024-11-01.html")
 
     pdf_path = reader.create_pdf_from_filing(html_path)
